@@ -44,12 +44,22 @@ public class JdbcTransaction implements Transaction {
   protected TransactionIsolationLevel level;
   protected boolean autoCommit;
 
+  /**
+   * 事务构造器，属性：datasoure,事务隔离级别、是否自动提交、jdk的sql connection
+   * @param ds
+   * @param desiredLevel
+   * @param desiredAutoCommit
+   */
   public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
     dataSource = ds;
     level = desiredLevel;
     autoCommit = desiredAutoCommit;
   }
 
+  /**
+   * 事务构造器
+   * @param connection jdk 的sql connection
+   */
   public JdbcTransaction(Connection connection) {
     this.connection = connection;
   }

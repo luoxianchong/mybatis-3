@@ -294,7 +294,7 @@ public final class MappedStatement {
   }
 
   public BoundSql getBoundSql(Object parameterObject) {
-    BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    BoundSql boundSql = sqlSource.getBoundSql(parameterObject);//创建sql约束
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings == null || parameterMappings.isEmpty()) {
       boundSql = new BoundSql(configuration, boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);
@@ -306,7 +306,7 @@ public final class MappedStatement {
       if (rmId != null) {
         ResultMap rm = configuration.getResultMap(rmId);
         if (rm != null) {
-          hasNestedResultMaps |= rm.hasNestedResultMaps();
+          hasNestedResultMaps |= rm.hasNestedResultMaps();//是否有resultmap
         }
       }
     }

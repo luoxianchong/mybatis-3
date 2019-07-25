@@ -32,12 +32,14 @@ import org.apache.ibatis.session.Configuration;
  * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
  *
  * @author Clinton Begin
+ *
+ * sql约束、规范、包装
  */
 public class BoundSql {
 
-  private final String sql;
-  private final List<ParameterMapping> parameterMappings;
-  private final Object parameterObject;
+  private final String sql;//原始sql语句
+  private final List<ParameterMapping> parameterMappings;//参数
+  private final Object parameterObject;//sql参数，操作条件
   private final Map<String, Object> additionalParameters;
   private final MetaObject metaParameters;
 

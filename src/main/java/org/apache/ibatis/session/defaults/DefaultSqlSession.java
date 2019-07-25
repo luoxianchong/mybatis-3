@@ -140,6 +140,14 @@ public class DefaultSqlSession implements SqlSession {
     return this.selectList(statement, parameter, RowBounds.DEFAULT);
   }
 
+  /**
+   * 查询多个
+   * @param statement Unique identifier matching the statement to use.
+   * @param parameter A parameter object to pass to the statement.
+   * @param rowBounds  分页参数
+   * @param <E>
+   * @return
+   */
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
@@ -157,11 +165,23 @@ public class DefaultSqlSession implements SqlSession {
     select(statement, parameter, RowBounds.DEFAULT, handler);
   }
 
+  /**
+   *
+   * @param statement Unique identifier matching the statement to use.
+   * @param handler ResultHandler that will handle each retrieved row
+   */
   @Override
   public void select(String statement, ResultHandler handler) {
     select(statement, null, RowBounds.DEFAULT, handler);
   }
 
+  /**
+   *
+   * @param statement Unique identifier matching the statement to use.
+   * @param parameter 查询参数
+   * @param rowBounds RowBound instance to limit the query results
+   * @param handler ResultHandler that will handle each retrieved row
+   */
   @Override
   public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
     try {

@@ -95,6 +95,8 @@ public class Resources {
    * @param resource The resource to find
    * @return The resource
    * @throws java.io.IOException If the resource cannot be found or read
+   *
+   * 通过classloader 获取文件流
    */
   public static InputStream getResourceAsStream(String resource) throws IOException {
     return getResourceAsStream(null, resource);

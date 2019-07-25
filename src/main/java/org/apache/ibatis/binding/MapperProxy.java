@@ -46,7 +46,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
-      if (Object.class.equals(method.getDeclaringClass())) {
+      if (Object.class.equals(method.getDeclaringClass())) {//如果是一个Object 类则放过他，不做增强。
         return method.invoke(this, args);
       } else if (isDefaultMethod(method)) {
         return invokeDefaultMethod(proxy, method, args);
@@ -54,31 +54,41 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }
+    //maper 接口方法调用
     final MapperMethod mapperMethod = cachedMapperMethod(method);
     return mapperMethod.execute(sqlSession, args);
   }
 
   private MapperMethod cachedMapperMethod(Method method) {
+    //返回包装的method，如果之前没有则缓存。
     return methodCache.computeIfAbsent(method, k -> new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
   }
 
+  /**
+   * 方法调用
+   * @param proxy
+   * @param method
+   * @param args
+   * @return
+   * @throws Throwable
+   */
   private Object invokeDefaultMethod(Object proxy, Method method, Object[] args)
       throws Throwable {
-    final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class
-        .getDeclaredConstructor(Class.class, int.class);
+    final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
     if (!constructor.isAccessible()) {
       constructor.setAccessible(true);
     }
     final Class<?> declaringClass = method.getDeclaringClass();
     return constructor
         .newInstance(declaringClass,
-            MethodHandles.Lookup.PRIVATE | MethodHandles.Lookup.PROTECTED
-                | MethodHandles.Lookup.PACKAGE | MethodHandles.Lookup.PUBLIC)
+            MethodHandles.Lookup.PRIVATE | MethodHandles.Lookup.PROTECTED | MethodHandles.Lookup.PACKAGE | MethodHandles.Lookup.PUBLIC)
         .unreflectSpecial(method, declaringClass).bindTo(proxy).invokeWithArguments(args);
   }
 
   /**
    * Backport of java.lang.reflect.Method#isDefault()
+   *
+   * 主要判断该方法是不是被public 修饰，并且方法的类是不是接口
    */
   private boolean isDefaultMethod(Method method) {
     return (method.getModifiers()

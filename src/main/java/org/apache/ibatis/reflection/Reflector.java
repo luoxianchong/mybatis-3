@@ -39,28 +39,26 @@ import org.apache.ibatis.reflection.invoker.SetFieldInvoker;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 
 /**
- * This class represents a cached set of class definition information that
- * allows for easy mapping between property names and getter/setter methods.
- *
+ *Class 反射器，并把对象的方法、字段做name-method的映射缓存起来，包括构造器
  * @author Clinton Begin
  */
 public class Reflector {
 
-  private final Class<?> type;
+  private final Class<?> type;//被反射器解析的对象
   private final String[] readablePropertyNames;
   private final String[] writablePropertyNames;
   private final Map<String, Invoker> setMethods = new HashMap<>();
   private final Map<String, Invoker> getMethods = new HashMap<>();
   private final Map<String, Class<?>> setTypes = new HashMap<>();
   private final Map<String, Class<?>> getTypes = new HashMap<>();
-  private Constructor<?> defaultConstructor;
+  private Constructor<?> defaultConstructor;//缓存默认构造器
 
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {
     type = clazz;
-    addDefaultConstructor(clazz);
-    addGetMethods(clazz);
+    addDefaultConstructor(clazz);//读取默认构造器并缓存
+    addGetMethods(clazz);//读取get方法并缓存
     addSetMethods(clazz);
     addFields(clazz);
     readablePropertyNames = getMethods.keySet().toArray(new String[getMethods.keySet().size()]);
@@ -217,6 +215,11 @@ public class Reflector {
     }
   }
 
+  /**
+   * 字段获取修饰的对象类型
+   * @param src
+   * @return
+   */
   private Class<?> typeToClass(Type src) {
     Class<?> result = null;
     if (src instanceof Class) {
@@ -247,15 +250,15 @@ public class Reflector {
         // pr #16 - final static can only be set by the classloader
         int modifiers = field.getModifiers();
         if (!(Modifier.isFinal(modifiers) && Modifier.isStatic(modifiers))) {
-          addSetField(field);
+          addSetField(field);//保存到set方法中,set 方法排除了 final和static修饰的。
         }
       }
       if (!getMethods.containsKey(field.getName())) {
-        addGetField(field);
+        addGetField(field);//保存到get方法中
       }
     }
     if (clazz.getSuperclass() != null) {
-      addFields(clazz.getSuperclass());
+      addFields(clazz.getSuperclass());//读取超类
     }
   }
 
@@ -275,6 +278,11 @@ public class Reflector {
     }
   }
 
+  /**
+   * 非$开头、不等于serialVersionUID、不等于class 则为true
+   * @param name
+   * @return
+   */
   private boolean isValidPropertyName(String name) {
     return !(name.startsWith("$") || "serialVersionUID".equals(name) || "class".equals(name));
   }
@@ -284,6 +292,8 @@ public class Reflector {
    * declared in this class and any superclass.
    * We use this method, instead of the simpler <code>Class.getMethods()</code>,
    * because we want to look for private methods as well.
+   *
+   * 读取Class的所有方法包括private修饰的，并且是去重的。
    *
    * @param cls The class
    * @return An array containing all methods in this class

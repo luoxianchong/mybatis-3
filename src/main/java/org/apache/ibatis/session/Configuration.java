@@ -584,7 +584,6 @@ public class Configuration {
 
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
     executorType = executorType == null ? defaultExecutorType : executorType;
-    executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
     Executor executor;
     if (ExecutorType.BATCH == executorType) {
       executor = new BatchExecutor(this, transaction);
@@ -732,6 +731,12 @@ public class Configuration {
     return this.getMappedStatement(id, true);
   }
 
+  /**
+   * 获取Statement包装类，根据id
+   * @param id
+   * @param validateIncompleteStatements 是否校验statement
+   * @return
+   */
   public MappedStatement getMappedStatement(String id, boolean validateIncompleteStatements) {
     if (validateIncompleteStatements) {
       buildAllStatements();
@@ -782,7 +787,7 @@ public class Configuration {
     cacheRefMap.put(namespace, referencedNamespace);
   }
 
-  /*
+  /**
    * Parses all the unprocessed statement nodes in the cache. It is recommended
    * to call this method once all the mappers are added as it provides fail-fast
    * statement validation.

@@ -148,8 +148,8 @@ public abstract class BaseExecutor implements Executor {
     }
     List<E> list;
     try {
-      queryStack++;
-      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
+      queryStack++;//查询栈
+      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;//localCache  一级缓存、多线程中有可能拿到的是缓存占位
       if (list != null) {
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
@@ -197,7 +197,7 @@ public abstract class BaseExecutor implements Executor {
       throw new ExecutorException("Executor was closed.");
     }
     CacheKey cacheKey = new CacheKey();
-    cacheKey.update(ms.getId());
+    cacheKey.update(ms.getId());//根据sql id 计算其hash。并更新原有hash
     cacheKey.update(rowBounds.getOffset());
     cacheKey.update(rowBounds.getLimit());
     cacheKey.update(boundSql.getSql());
@@ -319,21 +319,21 @@ public abstract class BaseExecutor implements Executor {
 
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
-    localCache.putObject(key, EXECUTION_PLACEHOLDER);
+    localCache.putObject(key, EXECUTION_PLACEHOLDER);//站位
     try {
       list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     } finally {
       localCache.removeObject(key);
     }
-    localCache.putObject(key, list);
-    if (ms.getStatementType() == StatementType.CALLABLE) {
+    localCache.putObject(key, list);//缓存查询结果
+    if (ms.getStatementType() == StatementType.CALLABLE) {//如果sql类型是存储过程,还需缓存参数
       localOutputParameterCache.putObject(key, parameter);
     }
     return list;
   }
 
   protected Connection getConnection(Log statementLog) throws SQLException {
-    Connection connection = transaction.getConnection();
+    Connection connection = transaction.getConnection();//获取sqlconnection
     if (statementLog.isDebugEnabled()) {
       return ConnectionLogger.newInstance(connection, statementLog, queryStack);
     } else {

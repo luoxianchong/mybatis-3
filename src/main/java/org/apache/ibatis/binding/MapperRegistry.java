@@ -34,20 +34,32 @@ import org.apache.ibatis.session.SqlSession;
 public class MapperRegistry {
 
   private final Configuration config;
-  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
+  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();//为什么使用hashmap？？
 
+  /**
+   * 配置 成员变量 构造器
+   * @param config
+   */
   public MapperRegistry(Configuration config) {
     this.config = config;
   }
 
+  /**
+   * 获取Mapper 接口类
+   * @param type
+   * @param sqlSession
+   * @param <T>
+   * @return
+   */
   @SuppressWarnings("unchecked")
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+    //mapper 代理工厂类
     final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
     if (mapperProxyFactory == null) {
       throw new BindingException("Type " + type + " is not known to the MapperRegistry.");
     }
     try {
-      return mapperProxyFactory.newInstance(sqlSession);
+      return mapperProxyFactory.newInstance(sqlSession);//创建mapper 接口的实例
     } catch (Exception e) {
       throw new BindingException("Error getting mapper instance. Cause: " + e, e);
     }
@@ -57,9 +69,14 @@ public class MapperRegistry {
     return knownMappers.containsKey(type);
   }
 
+  /**
+   * 缓存配置类中的Mapper 接口，以便生成实例。
+   * @param type
+   * @param <T>
+   */
   public <T> void addMapper(Class<T> type) {
     if (type.isInterface()) {
-      if (hasMapper(type)) {
+      if (hasMapper(type)) {//判重
         throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
       }
       boolean loadCompleted = false;

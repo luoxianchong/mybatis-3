@@ -46,14 +46,21 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class MapperMethod {
 
-  private final SqlCommand command;
+  private final SqlCommand command;//CRUD or flush 即被FLUSH 注解，用于批量sql执行
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
+    //mapperInterface  mapper 接口，config 来自sqlSession,
     this.command = new SqlCommand(config, mapperInterface, method);
-    this.method = new MethodSignature(config, mapperInterface, method);
+    this.method = new MethodSignature(config, mapperInterface, method);//方法签名，保证唯一性
   }
 
+  /**
+   * mapper接口中方法的增强处理
+   * @param sqlSession
+   * @param args
+   * @return
+   */
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
     switch (command.getType()) {
@@ -92,7 +99,7 @@ public class MapperMethod {
         }
         break;
       case FLUSH:
-        result = sqlSession.flushStatements();
+        result = sqlSession.flushStatements();//用于批量sql执行
         break;
       default:
         throw new BindingException("Unknown execution method for: " + command.getName());
@@ -253,7 +260,7 @@ public class MapperMethod {
 
     private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName,
         Class<?> declaringClass, Configuration configuration) {
-      String statementId = mapperInterface.getName() + "." + methodName;
+      String statementId = mapperInterface.getName() + "." + methodName;//sql的id
       if (configuration.hasStatement(statementId)) {
         return configuration.getMappedStatement(statementId);
       } else if (mapperInterface.equals(declaringClass)) {

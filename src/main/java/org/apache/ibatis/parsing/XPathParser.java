@@ -121,6 +121,13 @@ public class XPathParser {
     this.document = createDocument(new InputSource(reader));
   }
 
+  /**
+   * xml 解析器的构造方法，加载资源
+   * @param inputStream  资源文件输入流
+   * @param validation
+   * @param variables
+   * @param entityResolver 对象解析器，即dtd文件
+   */
   public XPathParser(InputStream inputStream, boolean validation, Properties variables, EntityResolver entityResolver) {
     commonConstructor(validation, variables, entityResolver);
     this.document = createDocument(new InputSource(inputStream));
@@ -261,11 +268,17 @@ public class XPathParser {
     }
   }
 
+  /**
+   * 缓存部分属性，并通过工厂类生成xpath
+   * @param validation
+   * @param variables
+   * @param entityResolver
+   */
   private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
     this.validation = validation;
     this.entityResolver = entityResolver;
     this.variables = variables;
-    XPathFactory factory = XPathFactory.newInstance();
+    XPathFactory factory = XPathFactory.newInstance();//jdk的xpathFactory
     this.xpath = factory.newXPath();
   }
 

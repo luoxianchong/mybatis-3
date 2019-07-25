@@ -30,6 +30,10 @@ public class MapperProxyFactory<T> {
   private final Class<T> mapperInterface;
   private final Map<Method, MapperMethod> methodCache = new ConcurrentHashMap<>();
 
+  /**
+   * mapper 接口类的 工厂构函数
+   * @param mapperInterface
+   */
   public MapperProxyFactory(Class<T> mapperInterface) {
     this.mapperInterface = mapperInterface;
   }
@@ -42,12 +46,23 @@ public class MapperProxyFactory<T> {
     return methodCache;
   }
 
+  /**
+   * jdk 动态代理生成的实例，
+   * @param mapperProxy
+   * @return
+   */
   @SuppressWarnings("unchecked")
   protected T newInstance(MapperProxy<T> mapperProxy) {
     return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[] { mapperInterface }, mapperProxy);
   }
 
+  /**
+   * mapper生成实例方法，通过jdk 动态代理生成的实例
+   * @param sqlSession
+   * @return
+   */
   public T newInstance(SqlSession sqlSession) {
+    //MapperProxy  代理类，实际主要是处理 mapper 的增强方法。即实现动态代理的  InvocationHandler
     final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface, methodCache);
     return newInstance(mapperProxy);
   }

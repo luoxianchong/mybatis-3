@@ -49,18 +49,25 @@ public class ParamNameResolver {
 
   private boolean hasParamAnnotation;
 
+  /**
+   * 方法参数解析，
+   * @param config
+   * @param method
+   */
   public ParamNameResolver(Configuration config, Method method) {
-    final Class<?>[] paramTypes = method.getParameterTypes();
-    final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+    final Class<?>[] paramTypes = method.getParameterTypes();//参数类型
+    final Annotation[][] paramAnnotations = method.getParameterAnnotations();//参数注解
     final SortedMap<Integer, String> map = new TreeMap<>();
-    int paramCount = paramAnnotations.length;
+    int paramCount = paramAnnotations.length;//参数注解长度
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
-      if (isSpecialParameter(paramTypes[paramIndex])) {
+      if (isSpecialParameter(paramTypes[paramIndex])) {//判断参数是否为RowBound或ResultHandler的子类，是 则跳过
         // skip special parameters
         continue;
       }
       String name = null;
+
+      // 获取 param中的别名，并按参数序号为key缓存到map中
       for (Annotation annotation : paramAnnotations[paramIndex]) {
         if (annotation instanceof Param) {
           hasParamAnnotation = true;
@@ -70,13 +77,13 @@ public class ParamNameResolver {
       }
       if (name == null) {
         // @Param was not specified.
-        if (config.isUseActualParamName()) {
-          name = getActualParamName(method, paramIndex);
+        if (config.isUseActualParamName()) {//是否开启使用实际参数名的配置，在setting 标签中
+          name = getActualParamName(method, paramIndex);//读取方法中的参数名，var1,var2之类的
         }
         if (name == null) {
           // use the parameter index as the name ("0", "1", ...)
           // gcode issue #71
-          name = String.valueOf(map.size());
+          name = String.valueOf(map.size());//实在没有，给个序号
         }
       }
       map.put(paramIndex, name);
@@ -84,10 +91,21 @@ public class ParamNameResolver {
     names = Collections.unmodifiableSortedMap(map);
   }
 
+  /**
+   * 根据方法和方法中参数的序号读取参数名，使用了反射的方式。
+   * @param method
+   * @param paramIndex
+   * @return
+   */
   private String getActualParamName(Method method, int paramIndex) {
     return ParamNameUtil.getParamNames(method).get(paramIndex);
   }
 
+  /**
+   * 判断参数是否为RowBound或ResultHandler的子类
+   * @param clazz
+   * @return
+   */
   private static boolean isSpecialParameter(Class<?> clazz) {
     return RowBounds.class.isAssignableFrom(clazz) || ResultHandler.class.isAssignableFrom(clazz);
   }
