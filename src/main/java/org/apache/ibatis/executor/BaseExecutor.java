@@ -113,6 +113,7 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+    //更新操作清理缓存
     clearLocalCache();
     return doUpdate(ms, parameter);
   }
@@ -143,6 +144,7 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+    //第一次查询，并且flushCache为true  查询 默认 false ： boolean flushCache = !isSelect;
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
       clearLocalCache();
     }
@@ -164,6 +166,8 @@ public abstract class BaseExecutor implements Executor {
       }
       // issue #601
       deferredLoads.clear();
+
+      //全局配置缓存级别为STATEMENT 一级缓存失效
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
         clearLocalCache();

@@ -191,6 +191,7 @@ class PooledConnection implements InvocationHandler {
   }
 
   /**
+   * 当连接池用完时客户端调用getConnection()后等待获取新连接的时间，超时后将抛出
    * Getter for the time that this connection has been checked out.
    *
    * @return the time

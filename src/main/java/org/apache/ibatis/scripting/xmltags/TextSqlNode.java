@@ -52,6 +52,11 @@ public class TextSqlNode implements SqlNode {
     return true;
   }
 
+  /**
+   * ${ } 占位符解析器
+   * @param handler
+   * @return
+   */
   private GenericTokenParser createParser(TokenHandler handler) {
     return new GenericTokenParser("${", "}", handler);
   }

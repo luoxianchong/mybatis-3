@@ -1,5 +1,6 @@
 package org.ing;
 
+import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.google.gson.Gson;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.*;
@@ -19,6 +20,8 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) throws IOException {
+
+
         String config="config.xml";
         InputStream inputStream= Resources.getResourceAsStream(config);
 
@@ -26,7 +29,7 @@ public class Main {
 
         SqlSession session = factory.openSession();
 
-        Connection connection = session.getConnection();
+       // Connection connection = session.getConnection();
 
         List<User> list=session.selectList("org.ing.mapper.UserMapper.selectUser");
 

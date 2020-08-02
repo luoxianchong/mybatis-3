@@ -382,6 +382,24 @@ public class PooledDataSource implements DataSource {
     }
   }
 
+    /**
+     * 1.  先看是否有空闲(idle)状态下的PooledConnection对象，如果有，
+     *      就直接返回一个可用的PooledConnection对象；否则进行第2步。
+     *
+     * 2.  查看活动状态的PooledConnection池activeConnections是否已满；
+     *      如果没有满，则创建一个新的PooledConnection对象，然后放到activeConnections池中，
+     *      然后返回此PooledConnection对象；否则进行第三步；
+     *
+     * 3.  看最先进入activeConnections池中的PooledConnection对象是否已经过期：
+     *      如果已经过期，从activeConnections池中移除此对象，然后创建一个新的PooledConnection对象，
+     *      添加到activeConnections中，然后将此对象返回；否则进行第4步。
+     *
+     * 4.  线程等待，循环2步
+     * @param username
+     * @param password
+     * @return
+     * @throws SQLException
+     */
   private PooledConnection popConnection(String username, String password) throws SQLException {
     boolean countedWait = false;
     PooledConnection conn = null;
@@ -407,6 +425,7 @@ public class PooledDataSource implements DataSource {
           } else {
             // Cannot create new connection
             PooledConnection oldestActiveConnection = state.activeConnections.get(0);
+            //connection 连接最大等待时间
             long longestCheckoutTime = oldestActiveConnection.getCheckoutTime();
             if (longestCheckoutTime > poolMaximumCheckoutTime) {
               // Can claim overdue connection

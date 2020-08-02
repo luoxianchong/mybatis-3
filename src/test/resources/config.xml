@@ -4,19 +4,42 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <settings>
+        <!--这个配置使全局的映射器(二级缓存)启用或禁用缓存-->
+       <!-- <setting name="cacheEnabled" value="true" />-->
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
+
+    <plugins>
+        <plugin interceptor="org.ing.plugin.StatmentInterceptor" />
+    </plugins>
+
     <environments default="dev">
         <environment id="dev">
             <transactionManager type="JDBC"/>
+
             <dataSource type="POOLED">
-                <property name="driver" value="com.mysql.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://116.62.228.103:3306/imall"/>
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://116.62.228.103:3307/imall"/>
                 <property name="username" value="root"/>
                 <property name="password" value="zxcv"/>
             </dataSource>
         </environment>
+
+        <environment id="druid">
+            <transactionManager type="JDBC"/>
+            <dataSource type="org.ing.datasource.IngDataSourceFactory">
+                <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://116.62.228.103:3307/imall"/>
+                <property name="username" value="root"/>
+                <property name="password" value="zxcv"/>
+            </dataSource>
+
+
+        </environment>
+
     </environments>
+
+
     <mappers>
         <mapper resource="User.mapper.xml"/>
     </mappers>
